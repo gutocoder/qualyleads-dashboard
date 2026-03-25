@@ -89,6 +89,10 @@ export default function Onboarding() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
       setDone(true);
     } catch (err) {
       setError(err.message);
@@ -109,7 +113,7 @@ export default function Onboarding() {
           <div style={{ fontSize:13, fontWeight:600, color:ACCENT, marginBottom:8 }}>Your webhook URL:</div>
           <code style={{ fontSize:12, wordBreak:"break-all" }}>{webhookUrl}</code>
         </div>
-        <div style={{ fontSize:13, color:MUTED }}>Paste this into your form tool, Zapier, or CRM to send leads to QualyLeads.</div>
+        <div style={{ fontSize:13, color:MUTED }}>Redirecting you to your dashboard...</div>
       </div>
     </div>
   );
