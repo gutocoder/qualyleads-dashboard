@@ -2,6 +2,11 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabaseClient";
 
+async function signOut() {
+  await supabase.auth.signOut();
+  window.location.href = "/";
+}
+
 const G = "#16a34a";   // green accent
 const G2 = "#15803d";  // dark green
 const BG = "#ffffff";
@@ -85,7 +90,7 @@ function EmptyState({ filter }) {
   );
 }
 
-export default function App() {
+export default function App({ session, isAdmin = true }) {
   const [leads, setLeads]           = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [messages, setMessages]     = useState([]);
@@ -100,7 +105,9 @@ export default function App() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const { data } = await supabase.from("leads").select("*").order("created_at", { ascending:false });
+      const query = supabase.from("leads").select("*").order("created_at", { ascending:false });
+      if (!isAdmin) query.eq("industry", "gym"); // TODO: filter by client_id
+      const { data } = await query;
       setLeads(data || []);
       setLoading(false);
     }
@@ -250,11 +257,21 @@ export default function App() {
           )}
         </div>
 
-        {/* Onboard CTA */}
+        {/* Bottom: user + sign out */}
         <div style={{ padding:12, borderTop:`1px solid ${BORDER}` }}>
-          <a href="/onboarding" style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:6, height:34, background:G, color:"#fff", borderRadius:8, fontSize:12, fontWeight:600, textDecoration:"none" }}>
-            + Onboard new client
-          </a>
+          {isAdmin && (
+            <a href="/onboarding" style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:6, height:34, background:G, color:"#fff", borderRadius:8, fontSize:12, fontWeight:600, textDecoration:"none", marginBottom:8 }}>
+              + Onboard new client
+            </a>
+          )}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"8px 4px" }}>
+            <div style={{ fontSize:12, color:MUTED, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:180 }}>
+              {session?.user?.email}
+            </div>
+            <button onClick={signOut} style={{ fontSize:11, color:MUTED, background:"none", border:"none", cursor:"pointer", fontFamily:"inherit", flexShrink:0 }}>
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
 
