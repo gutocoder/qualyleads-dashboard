@@ -27,6 +27,18 @@ function Root() {
 
   async function loadSubscription(email) {
     if (email === ADMIN_EMAIL) return; // admin doesn't need subscription check
+    // Check clients table first (works with disabled RLS)
+    const { data: clientData } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("email", email)
+      .eq("status", "active")
+      .single();
+    if (clientData) {
+      setSubscription({ id: clientData.id, plan: "starter", status: "active" });
+      return;
+    }
+    // Fall back to subscribers table
     const { data } = await supabase.from("subscribers").select("*").eq("email", email).single();
     setSubscription(data);
   }
