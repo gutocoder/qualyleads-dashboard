@@ -278,16 +278,16 @@ export default function App({ session, isAdmin = true, subscription }) {
       setLoading(true);
       let query = supabase.from("leads").select("*").order("created_at", { ascending:false });
 
-      // Non-admin clients only see their own leads via client_id
-      if (!isAdmin && subscription?.id) {
-        // Find the client record linked to this subscriber
-        const { data: clientData } = await supabase
-          .from("clients")
-          .select("id")
-          .eq("email", session?.user?.email)
-          .single();
-        if (clientData?.id) {
-          query = query.eq("client_id", clientData.id);
+      // Non-admin: filter leads by their client_id
+      if (!isAdmin) {
+        if (subscription?.id) {
+          // subscription.id IS the client_id when loaded from clients table
+          query = query.eq("client_id", subscription.id);
+        } else {
+          // No client found — show no leads
+          setLeads([]);
+          setLoading(false);
+          return;
         }
       }
 
