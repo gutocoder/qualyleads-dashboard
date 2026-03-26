@@ -47,9 +47,12 @@ export default function Onboarding() {
   const [phone, setPhone]               = useState("");
   const [calendlyUrl, setCalendlyUrl]   = useState("");
   const [testPhone, setTestPhone]       = useState("");
+  const [clientId, setClientId]         = useState(null);
 
   const BACKEND = import.meta.env.VITE_BACKEND_URL || "https://web-production-7ffda.up.railway.app";
-  const webhookUrl = `${BACKEND}/zapier/lead`;
+  const webhookUrl = clientId
+    ? `${BACKEND}/zapier/lead?client=${clientId}`
+    : `${BACKEND}/zapier/lead`;
 
   function step1Next() {
     if (!businessName || !industry || !ownerName || !email) {
@@ -67,24 +70,29 @@ export default function Onboarding() {
     if (!testPhone) { setError("Please enter a phone number to test."); return; }
     setError(""); setLoading(true);
     try {
-      // Save to Supabase
-      await supabase.from("clients").insert({
-        business_name: businessName,
-        industry,
-        owner_name:    ownerName,
-        email,
-        phone,
-        calendly_url:  calendlyUrl || null,
-        status:        "active",
-      });
+      // Save to Supabase and get client ID
+      const { data: clientData, error: clientErr } = await supabase
+        .from("clients")
+        .insert({
+          business_name: businessName,
+          industry,
+          owner_name:    ownerName,
+          email,
+          phone,
+          calendly_url:  calendlyUrl || null,
+          status:        "active",
+        })
+        .select("id")
+        .single();
 
-      // Send test SMS
-      const res = await fetch(`${BACKEND}/webhook/lead`, {
+      if (clientErr) throw new Error(clientErr.message);
+      const newClientId = clientData.id;
+      setClientId(newClientId);
+
+      // Send test SMS with client_id in URL
+      const res = await fetch(`${BACKEND}/zapier/lead?client=${newClientId}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-webhook-secret": "qualyleads2025",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: ownerName, phone: testPhone, industry }),
       });
       const data = await res.json();
