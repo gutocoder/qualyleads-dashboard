@@ -260,7 +260,7 @@ function ClientsView({ leads }) {
 }
 
 // ── Main App ──────────────────────────────────────────────────────────────────
-export default function App({ session, isAdmin = true }) {
+export default function App({ session, isAdmin = true, subscription }) {
   const [view, setView]             = useState("leads"); // leads | clients
   const [leads, setLeads]           = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -276,7 +276,22 @@ export default function App({ session, isAdmin = true }) {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const { data } = await supabase.from("leads").select("*").order("created_at", { ascending:false });
+      let query = supabase.from("leads").select("*").order("created_at", { ascending:false });
+
+      // Non-admin clients only see their own leads via client_id
+      if (!isAdmin && subscription?.id) {
+        // Find the client record linked to this subscriber
+        const { data: clientData } = await supabase
+          .from("clients")
+          .select("id")
+          .eq("email", session?.user?.email)
+          .single();
+        if (clientData?.id) {
+          query = query.eq("client_id", clientData.id);
+        }
+      }
+
+      const { data } = await query;
       setLeads(data || []);
       setLoading(false);
     }
@@ -285,7 +300,7 @@ export default function App({ session, isAdmin = true }) {
       .on("postgres_changes", { event:"*", schema:"public", table:"leads" }, load)
       .subscribe();
     return () => supabase.removeChannel(ch);
-  }, []);
+  }, [isAdmin, subscription]);
 
   useEffect(() => {
     if (!selectedId) return;
