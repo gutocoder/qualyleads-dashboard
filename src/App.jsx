@@ -212,7 +212,17 @@ function ClientsView({ leads }) {
                 <div style={{ fontSize:13, color:MUTED }}>{selected.email} · {selected.phone}</div>
               </div>
             </div>
-            <ClientStatusBadge status={selected.status} />
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+  <ClientStatusBadge status={selected.status} />
+  {selected.status === "active" && (
+    
+      href={`mailto:gustavo@qualyleads.com?subject=Cancel subscription — ${selected.business_name}&body=Hi Gustavo, I'd like to cancel my QualyLeads subscription for ${selected.business_name}.`}
+      style={{ fontSize:12, color:"#dc2626", background:"#fef2f2", border:"1px solid #fecaca", borderRadius:6, padding:"4px 10px", textDecoration:"none" }}
+    >
+      Cancel subscription
+    </a>
+  )}
+</div>
           </div>
 
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:20 }}>
