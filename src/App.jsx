@@ -1,12 +1,10 @@
 // src/App.jsx — QualyLeads Dashboard v3 (with Clients tab)
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "./supabaseClient";
-
 async function signOut() {
   await supabase.auth.signOut();
   window.location.href = "/";
 }
-
 const G = "#16a34a";
 const G2 = "#15803d";
 const BG = "#ffffff";
@@ -16,14 +14,12 @@ const BORDER = "#e2e8f0";
 const TEXT = "#0f172a";
 const MUTED = "#64748b";
 const MUTED2 = "#94a3b8";
-
 const STATUS_CONFIG = {
   contacted:    { label:"Contacted",  dot:"#3b82f6", bg:"#eff6ff", color:"#1d4ed8", border:"#bfdbfe" },
   replied:      { label:"Replied",    dot:"#f59e0b", bg:"#fffbeb", color:"#b45309", border:"#fde68a" },
   booked:       { label:"Booked",     dot:"#16a34a", bg:"#f0fdf4", color:"#15803d", border:"#bbf7d0" },
   unresponsive: { label:"No reply",   dot:"#94a3b8", bg:"#f8fafc", color:"#64748b", border:"#e2e8f0" },
 };
-
 const INDUSTRY_CONFIG = {
   gym:     { label:"Gym",     icon:"🏋️", bg:"#f0fdf4", color:"#15803d", border:"#bbf7d0" },
   plumber: { label:"Plumber", icon:"🔧", bg:"#eff6ff", color:"#1d4ed8", border:"#bfdbfe" },
@@ -31,13 +27,11 @@ const INDUSTRY_CONFIG = {
   coach:   { label:"Coach",   icon:"🧑‍💼", bg:"#fff7ed", color:"#c2410c", border:"#fed7aa" },
   general: { label:"General", icon:"🏢", bg:"#f8fafc", color:"#64748b", border:"#e2e8f0" },
 };
-
 const CLIENT_STATUS = {
   active:      { label:"Active",      bg:"#f0fdf4", color:"#15803d", border:"#bbf7d0" },
   onboarding:  { label:"Onboarding",  bg:"#fffbeb", color:"#b45309", border:"#fde68a" },
   paused:      { label:"Paused",      bg:"#f8fafc", color:"#64748b", border:"#e2e8f0" },
 };
-
 function StatusBadge({ status }) {
   const c = STATUS_CONFIG[status] || STATUS_CONFIG.contacted;
   return (
@@ -47,7 +41,6 @@ function StatusBadge({ status }) {
     </span>
   );
 }
-
 function IndustryBadge({ industry }) {
   const c = INDUSTRY_CONFIG[industry?.toLowerCase()] || INDUSTRY_CONFIG.general;
   return (
@@ -56,7 +49,6 @@ function IndustryBadge({ industry }) {
     </span>
   );
 }
-
 function ClientStatusBadge({ status }) {
   const c = CLIENT_STATUS[status] || CLIENT_STATUS.onboarding;
   return (
@@ -65,7 +57,6 @@ function ClientStatusBadge({ status }) {
     </span>
   );
 }
-
 function Avatar({ name, size = 32 }) {
   const initials = name?.split(" ").map(w => w[0]).slice(0,2).join("").toUpperCase() || "?";
   const colors = ["#3b82f6","#8b5cf6","#f59e0b","#ef4444","#06b6d4","#ec4899"];
@@ -76,7 +67,6 @@ function Avatar({ name, size = 32 }) {
     </div>
   );
 }
-
 function StatCard({ label, value, sub, accent }) {
   return (
     <div style={{ background:BG, border:`1px solid ${BORDER}`, borderRadius:12, padding:"20px 24px" }}>
@@ -86,13 +76,11 @@ function StatCard({ label, value, sub, accent }) {
     </div>
   );
 }
-
 // ── Clients Tab ───────────────────────────────────────────────────────────────
 function ClientsView({ leads }) {
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
-
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -102,8 +90,6 @@ function ClientsView({ leads }) {
     }
     load();
   }, []);
-
-  // Calculate stats per client from leads
   function getClientStats(clientId) {
     const clientLeads = leads.filter(l => l.client_id === clientId);
     const booked = clientLeads.filter(l => l.status === "booked").length;
@@ -111,11 +97,9 @@ function ClientsView({ leads }) {
     const rate = clientLeads.length ? Math.round((booked / clientLeads.length) * 100) : 0;
     return { total: clientLeads.length, booked, replied, rate };
   }
-
   if (loading) return (
     <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", color:MUTED }}>Loading clients...</div>
   );
-
   return (
     <div style={{ flex:1, overflowY:"auto", padding:32 }}>
       <div style={{ marginBottom:28, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
@@ -127,15 +111,12 @@ function ClientsView({ leads }) {
           + Onboard new client
         </a>
       </div>
-
-      {/* Summary stats */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:32 }}>
         <StatCard label="Total clients" value={clients.length} sub="All time" />
         <StatCard label="Active" value={clients.filter(c=>c.status==="active").length} sub="Paying clients" accent={G} />
         <StatCard label="Total leads" value={leads.length} sub="Across all clients" />
         <StatCard label="Total booked" value={leads.filter(l=>l.status==="booked").length} sub="Appointments confirmed" accent={G} />
       </div>
-
       {clients.length === 0 ? (
         <div style={{ background:BG, border:`1px solid ${BORDER}`, borderRadius:12, padding:48, textAlign:"center" }}>
           <div style={{ fontSize:40, marginBottom:16 }}>🏢</div>
@@ -147,13 +128,11 @@ function ClientsView({ leads }) {
         </div>
       ) : (
         <div style={{ background:BG, border:`1px solid ${BORDER}`, borderRadius:12, overflow:"hidden" }}>
-          {/* Table header */}
           <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px", gap:16, padding:"12px 20px", background:SURF, borderBottom:`1px solid ${BORDER}` }}>
             {["Client","Industry","Status","Leads","Booked","Conversion",""].map((h,i) => (
               <div key={i} style={{ fontSize:11, fontWeight:600, color:MUTED, textTransform:"uppercase", letterSpacing:"0.05em" }}>{h}</div>
             ))}
           </div>
-
           {clients.map((client, i) => {
             const stats = getClientStats(client.id);
             return (
@@ -169,7 +148,6 @@ function ClientsView({ leads }) {
                 onMouseEnter={e=>{ if(selected?.id!==client.id) e.currentTarget.style.background=SURF; }}
                 onMouseLeave={e=>{ if(selected?.id!==client.id) e.currentTarget.style.background=BG; }}
               >
-                {/* Client name */}
                 <div style={{ display:"flex", alignItems:"center", gap:10, minWidth:0 }}>
                   <Avatar name={client.business_name} size={34} />
                   <div style={{ minWidth:0 }}>
@@ -177,19 +155,11 @@ function ClientsView({ leads }) {
                     <div style={{ fontSize:11, color:MUTED }}>{client.owner_name}</div>
                   </div>
                 </div>
-                {/* Industry */}
-                <div style={{ display:"flex", alignItems:"center" }}>
-                  <IndustryBadge industry={client.industry} />
-                </div>
-                {/* Status */}
-                <div style={{ display:"flex", alignItems:"center" }}>
-                  <ClientStatusBadge status={client.status} />
-                </div>
-                {/* Stats */}
+                <div style={{ display:"flex", alignItems:"center" }}><IndustryBadge industry={client.industry} /></div>
+                <div style={{ display:"flex", alignItems:"center" }}><ClientStatusBadge status={client.status} /></div>
                 <div style={{ display:"flex", alignItems:"center", fontWeight:600, fontSize:14 }}>{stats.total}</div>
                 <div style={{ display:"flex", alignItems:"center", fontWeight:600, fontSize:14, color:G }}>{stats.booked}</div>
                 <div style={{ display:"flex", alignItems:"center", fontWeight:600, fontSize:14, color:stats.rate>20?G:TEXT }}>{stats.rate}%</div>
-                {/* Actions */}
                 <div style={{ display:"flex", alignItems:"center" }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2">
                     <path d={selected?.id === client.id ? "m18 15-6-6-6 6" : "m6 9 6 6 6-6"}/>
@@ -200,8 +170,6 @@ function ClientsView({ leads }) {
           })}
         </div>
       )}
-
-      {/* Expanded client detail */}
       {selected && (
         <div style={{ marginTop:16, background:BG, border:`1px solid ${BORDER}`, borderRadius:12, padding:24 }}>
           <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
@@ -212,24 +180,23 @@ function ClientsView({ leads }) {
                 <div style={{ fontSize:13, color:MUTED }}>{selected.email} · {selected.phone}</div>
               </div>
             </div>
-           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-  <ClientStatusBadge status={selected.status} />
-  {selected.status === "active" && (
-    
-      href={`mailto:gustavo@qualyleads.com?subject=Cancel subscription — ${selected.business_name}&body=Hi Gustavo, I'd like to cancel my QualyLeads subscription for ${selected.business_name}.`}
-      style={{ fontSize:12, color:"#dc2626", background:"#fef2f2", border:"1px solid #fecaca", borderRadius:6, padding:"4px 10px", textDecoration:"none" }}
-    >
-      Cancel subscription
-    </a>
-  )}
-</div>
+            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+              <ClientStatusBadge status={selected.status} />
+              {selected.status === "active" && (
+                <a
+                  href={`mailto:gustavo@qualyleads.com?subject=Cancel subscription — ${selected.business_name}&body=Hi Gustavo, I'd like to cancel my QualyLeads subscription for ${selected.business_name}.`}
+                  style={{ fontSize:12, color:"#dc2626", background:"#fef2f2", border:"1px solid #fecaca", borderRadius:6, padding:"4px 10px", textDecoration:"none" }}
+                >
+                  Cancel subscription
+                </a>
+              )}
+            </div>
           </div>
-
           <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:16, marginBottom:20 }}>
             {[
               { label:"Owner", value: selected.owner_name || "—" },
               { label:"Industry", value: selected.industry || "—" },
-              { label:"Calendly", value: selected.calendly_url ? "Connected ✅" : "Not set" },
+              { label:"Booking URL", value: selected.booking_url ? "Connected ✅" : "Not set" },
             ].map((item,i) => (
               <div key={i} style={{ background:SURF, borderRadius:8, padding:"12px 16px" }}>
                 <div style={{ fontSize:11, color:MUTED, marginBottom:4, textTransform:"uppercase", letterSpacing:"0.05em" }}>{item.label}</div>
@@ -237,16 +204,12 @@ function ClientsView({ leads }) {
               </div>
             ))}
           </div>
-
-          {/* Client's webhook URL */}
           <div style={{ background:SURF, border:`1px solid ${BORDER}`, borderRadius:8, padding:"12px 16px" }}>
             <div style={{ fontSize:11, color:MUTED, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.05em" }}>Webhook URL</div>
             <code style={{ fontSize:12, color:TEXT }}>
-              {`${import.meta.env.VITE_BACKEND_URL || "https://web-production-7ffda.up.railway.app"}/zapier/lead`}
+              {`${import.meta.env.VITE_BACKEND_URL || "https://web-production-7ffda.up.railway.app"}/zapier/lead?client=${selected.id}`}
             </code>
           </div>
-
-          {/* Recent leads for this client */}
           {leads.filter(l => l.client_id === selected.id).length > 0 && (
             <div style={{ marginTop:16 }}>
               <div style={{ fontSize:13, fontWeight:600, marginBottom:10 }}>Recent leads</div>
@@ -268,10 +231,9 @@ function ClientsView({ leads }) {
     </div>
   );
 }
-
 // ── Main App ──────────────────────────────────────────────────────────────────
 export default function App({ session, isAdmin = true, subscription }) {
-  const [view, setView]             = useState("leads"); // leads | clients
+  const [view, setView]             = useState("leads");
   const [leads, setLeads]           = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [messages, setMessages]     = useState([]);
@@ -282,25 +244,19 @@ export default function App({ session, isAdmin = true, subscription }) {
   const [msgLoading, setMsgLoading] = useState(false);
   const [sending, setSending]       = useState(false);
   const chatRef = useRef(null);
-
   useEffect(() => {
     async function load() {
       setLoading(true);
       let query = supabase.from("leads").select("*").order("created_at", { ascending:false });
-
-      // Non-admin: filter leads by their client_id
       if (!isAdmin) {
         if (subscription?.id) {
-          // subscription.id IS the client_id when loaded from clients table
           query = query.eq("client_id", subscription.id);
         } else {
-          // No client found — show no leads
           setLeads([]);
           setLoading(false);
           return;
         }
       }
-
       const { data } = await query;
       setLeads(data || []);
       setLoading(false);
@@ -311,7 +267,6 @@ export default function App({ session, isAdmin = true, subscription }) {
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, [isAdmin, subscription]);
-
   useEffect(() => {
     if (!selectedId) return;
     async function load() {
@@ -327,14 +282,11 @@ export default function App({ session, isAdmin = true, subscription }) {
       .subscribe();
     return () => supabase.removeChannel(ch);
   }, [selectedId]);
-
   useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [messages]);
-
   async function updateStatus(id, status) {
     await supabase.from("leads").update({ status }).eq("id", id);
     setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
   }
-
   async function sendMessage() {
     if (!draft.trim() || !selectedId || sending) return;
     const content = draft.trim();
@@ -344,18 +296,15 @@ export default function App({ session, isAdmin = true, subscription }) {
     await supabase.from("messages").insert({ lead_id:selectedId, role:"assistant", content });
     setSending(false);
   }
-
   const filtered = leads.filter(l => {
     const fOk = filter === "all" || l.status === filter;
     const sOk = !search || l.name?.toLowerCase().includes(search.toLowerCase()) || l.industry?.toLowerCase().includes(search.toLowerCase()) || l.phone?.includes(search);
     return fOk && sOk;
   });
-
   const selected = leads.find(l => l.id === selectedId);
   const booked   = leads.filter(l => l.status === "booked").length;
   const replied  = leads.filter(l => l.status === "replied").length;
   const rate     = leads.length ? Math.round((booked / leads.length) * 100) : 0;
-
   const FILTERS = [
     { key:"all",          label:"All",       count: leads.length },
     { key:"contacted",    label:"Contacted", count: leads.filter(l=>l.status==="contacted").length },
@@ -363,7 +312,6 @@ export default function App({ session, isAdmin = true, subscription }) {
     { key:"booked",       label:"Booked",    count: booked },
     { key:"unresponsive", label:"No reply",  count: leads.filter(l=>l.status==="unresponsive").length },
   ];
-
   const navBtn = (key, icon, label) => (
     <button onClick={()=>{ setView(key); setSelectedId(null); }} style={{
       width:"100%", display:"flex", alignItems:"center", gap:8,
@@ -376,14 +324,10 @@ export default function App({ session, isAdmin = true, subscription }) {
       <span style={{ fontSize:15 }}>{icon}</span> {label}
     </button>
   );
-
   return (
     <div style={{ display:"flex", height:"100vh", background:SURF, fontFamily:"'Geist','Inter',system-ui,sans-serif", fontSize:13, color:TEXT, overflow:"hidden" }}>
-
       {/* ══ SIDEBAR ══ */}
       <div style={{ width:280, background:BG, borderRight:`1px solid ${BORDER}`, display:"flex", flexDirection:"column", flexShrink:0 }}>
-
-        {/* Brand */}
         <div style={{ padding:"20px 16px 16px", borderBottom:`1px solid ${BORDER}` }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:16 }}>
             <div style={{ width:32, height:32, borderRadius:8, background:G, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -396,15 +340,11 @@ export default function App({ session, isAdmin = true, subscription }) {
               <div style={{ fontSize:11, color:MUTED }}>{isAdmin ? "Admin dashboard" : "Your dashboard"}</div>
             </div>
           </div>
-
-          {/* Nav tabs */}
           <div>
             {navBtn("leads", "💬", "Leads")}
             {isAdmin && navBtn("clients", "🏢", "Clients")}
           </div>
         </div>
-
-        {/* Lead filters — only show on leads view */}
         {view === "leads" && (
           <>
             <div style={{ padding:"12px 12px 4px" }}>
@@ -415,7 +355,6 @@ export default function App({ session, isAdmin = true, subscription }) {
                 <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search leads..." style={{ width:"100%", height:34, background:SURF, border:`1px solid ${BORDER}`, borderRadius:8, paddingLeft:30, paddingRight:12, color:TEXT, fontSize:12, fontFamily:"inherit", outline:"none", boxSizing:"border-box" }} />
               </div>
             </div>
-
             <div style={{ padding:"8px 12px 4px" }}>
               {FILTERS.map(f => (
                 <button key={f.key} onClick={()=>setFilter(f.key)} style={{
@@ -431,10 +370,7 @@ export default function App({ session, isAdmin = true, subscription }) {
                 </button>
               ))}
             </div>
-
             <div style={{ height:1, background:BORDER, margin:"4px 12px 4px" }} />
-
-            {/* Lead list */}
             <div style={{ flex:1, overflowY:"auto", padding:"4px 0" }}>
               {loading ? (
                 Array.from({length:4}).map((_,i) => (
@@ -474,11 +410,7 @@ export default function App({ session, isAdmin = true, subscription }) {
             </div>
           </>
         )}
-
-        {/* Clients view — no lead list in sidebar */}
         {view === "clients" && <div style={{ flex:1 }} />}
-
-        {/* Bottom user bar */}
         <div style={{ padding:12, borderTop:`1px solid ${BORDER}` }}>
           {isAdmin && view === "leads" && (
             <a href="/onboarding" style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:6, height:34, background:G, color:"#fff", borderRadius:8, fontSize:12, fontWeight:600, textDecoration:"none", marginBottom:8 }}>
@@ -495,16 +427,9 @@ export default function App({ session, isAdmin = true, subscription }) {
           </div>
         </div>
       </div>
-
       {/* ══ MAIN CONTENT ══ */}
       <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
-
-        {/* Clients view */}
-        {view === "clients" && isAdmin && (
-          <ClientsView leads={leads} />
-        )}
-
-        {/* Leads view */}
+        {view === "clients" && isAdmin && <ClientsView leads={leads} />}
         {view === "leads" && (
           !selected ? (
             <div style={{ flex:1, overflowY:"auto", padding:32 }}>
@@ -512,14 +437,12 @@ export default function App({ session, isAdmin = true, subscription }) {
                 <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:"-0.03em", marginBottom:4 }}>Overview</h1>
                 <div style={{ fontSize:13, color:MUTED }}>Your QualyLeads performance at a glance.</div>
               </div>
-
               <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:32 }}>
                 <StatCard label="Total leads" value={leads.length} sub={leads.length===0?"Waiting for first lead":"All time"} />
                 <StatCard label="Booked" value={booked} sub={booked===0?"None yet":"Appointments confirmed"} accent={G} />
                 <StatCard label="Replied" value={replied} sub="Engaged with Qualy" />
                 <StatCard label="Conversion" value={`${rate}%`} sub="Leads → bookings" accent={rate>20?G:undefined} />
               </div>
-
               {leads.length > 0 ? (
                 <div>
                   <div style={{ fontSize:14, fontWeight:600, marginBottom:12 }}>Recent leads</div>
@@ -562,7 +485,6 @@ export default function App({ session, isAdmin = true, subscription }) {
             </div>
           ) : (
             <>
-              {/* Header */}
               <div style={{ background:BG, borderBottom:`1px solid ${BORDER}`, padding:"0 24px", height:64, display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                   <button onClick={()=>setSelectedId(null)} style={{ width:32, height:32, borderRadius:7, border:`1px solid ${BORDER}`, background:"transparent", display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
@@ -584,8 +506,6 @@ export default function App({ session, isAdmin = true, subscription }) {
                   </select>
                 </div>
               </div>
-
-              {/* Stats bar */}
               <div style={{ background:BG, borderBottom:`1px solid ${BORDER}`, display:"flex", padding:"0 24px", flexShrink:0 }}>
                 {[
                   { label:"Total leads", value:leads.length },
@@ -599,8 +519,6 @@ export default function App({ session, isAdmin = true, subscription }) {
                   </div>
                 ))}
               </div>
-
-              {/* Messages */}
               <div ref={chatRef} style={{ flex:1, overflowY:"auto", padding:24, display:"flex", flexDirection:"column", gap:10, background:SURF }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, margin:"4px 0 8px" }}>
                   <div style={{ flex:1, height:1, background:BORDER }} />
@@ -609,7 +527,6 @@ export default function App({ session, isAdmin = true, subscription }) {
                   </span>
                   <div style={{ flex:1, height:1, background:BORDER }} />
                 </div>
-
                 {msgLoading ? (
                   [1,2,3].map(i => (
                     <div key={i} style={{ display:"flex", justifyContent:i%2===0?"flex-end":"flex-start" }}>
@@ -643,15 +560,12 @@ export default function App({ session, isAdmin = true, subscription }) {
                     );
                   })
                 )}
-
                 {selected.status === "booked" && (
                   <div style={{ alignSelf:"center", display:"inline-flex", alignItems:"center", gap:6, background:"#f0fdf4", border:"1px solid #bbf7d0", borderRadius:9999, padding:"6px 16px", fontSize:12, color:G2, fontWeight:600, marginTop:8 }}>
                     ✅ Appointment booked
                   </div>
                 )}
               </div>
-
-              {/* Message input */}
               <div style={{ background:BG, borderTop:`1px solid ${BORDER}`, padding:16, display:"flex", gap:10, alignItems:"center", flexShrink:0 }}>
                 <div style={{ flex:1, background:SURF, border:`1px solid ${BORDER}`, borderRadius:10, display:"flex", alignItems:"center", padding:"0 14px", gap:8 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={MUTED2} strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
