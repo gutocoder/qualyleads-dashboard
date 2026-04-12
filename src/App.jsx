@@ -212,7 +212,7 @@ function ClientsView({ leads }) {
                 <div style={{ fontSize:13, color:MUTED }}>{selected.email} · {selected.phone}</div>
               </div>
             </div>
-            <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
   <ClientStatusBadge status={selected.status} />
   {selected.status === "active" && (
     
